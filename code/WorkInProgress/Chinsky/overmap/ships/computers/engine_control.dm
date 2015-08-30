@@ -1,8 +1,9 @@
 //Engine control and monitoring console
 
 /obj/machinery/computer/engines
-	name = "engine control console"
-	icon_state = "engine1"
+	name = "engines control console"
+	icon_state = "engineeringcameras"
+	circuit = "/obj/item/weapon/circuitboard/propulsion_control"
 	var/state = "status"
 	var/list/engines = list()
 	var/obj/effect/map/ship/linked
@@ -12,16 +13,13 @@
 	if (linked)
 		if (!linked.eng_control)
 			linked.eng_control = src
-		testing("Engines console at level [z] found a corresponding overmap object '[linked.name]'.")
+//		testing("Engines console at level [z] found a corresponding overmap object '[linked.name]'.")
 	else
 		testing("Engines console at level [z] was unable to find a corresponding overmap object.")
 
-	for(var/datum/ship_engine/E in engines)
-		if ((E.zlevel in linked.ship_levels) && !(E in engines))
-			engines += E
-
-	for(var/level in linked.ship_levels)
-		testing("Z-level [level] is connected to this engine controller.")
+	for(var/datum/ship_engine/E in linked.ship_engines)
+		if ((E.zlevel in linked.ship_levels) && !(E in src.engines))
+			src.engines += E
 
 /obj/machinery/computer/engines/attack_hand(var/mob/user as mob)
 	if(..())
@@ -62,7 +60,7 @@
 
 /obj/machinery/computer/engines/Topic(href, href_list)
 	if(..())
-		return 1
+		return
 
 	if(href_list["state"])
 		state = href_list["state"]
@@ -87,7 +85,7 @@
 				E.toggle()
 
 	add_fingerprint(usr)
-	updateUsrDialog()
+	nanomanager.update_uis(src)
 
 /obj/machinery/computer/engines/proc/burn()
 	if(engines.len == 0)
@@ -101,6 +99,11 @@
 	for(var/datum/ship_engine/E in engines)
 		. += E.get_thrust()
 
+
+/obj/machinery/computer/engines/constructed
+	New()
+		..()
+		initialize()
 
 /obj/machinery/computer/engines/soviet
 	icon_state = "engineeringcamerassoviet-er"

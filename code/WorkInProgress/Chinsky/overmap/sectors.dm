@@ -4,16 +4,19 @@
 //===================================================================================
 var/global/list/map_sectors = list()
 
-/hook/startup/proc/build_map()
+/hook/startup/proc/build_map()					//I had a problem reading this, so I decided to explain everything.
 	if(!config.use_overmap)
 		return 1
 	testing("Building overmap...")
 	var/obj/effect/mapinfo/data
+
+	moving_levels.len = world.maxz
+
 	for(var/level in 1 to world.maxz)
+
 		data = locate("sector[level]")
-		testing("Z-Level [level] is a sector")
+
 		if(istype(data, /obj/effect/mapinfo/ship))							//First we'll check for ships, because they can occupy multiplie levels
-			testing("Sector is a ship with tag [data.tag]!")
 			var/obj/effect/map/ship/found_ship = locate("ship_[data.shipname]")
 			if(found_ship)													//If there is a ship with such a name...
 				testing("Ship \"[data.shipname]\" found at [data.mapx],[data.mapy] corresponding to zlevel [level]")
@@ -24,14 +27,13 @@ var/global/list/map_sectors = list()
 				found_ship.ship_levels += level
 				map_sectors["[level]"] = found_ship
 				testing("Ship \"[data.shipname]\" created \"[data.name]\" at [data.mapx],[data.mapy] corresponding to zlevel [level]")
-		else if (data)
-			testing("Sector is a normal sector")
+
+		else if (data)														//Else we will just create an object, corresponding to it.
 			testing("Located sector \"[data.name]\" at [data.mapx],[data.mapy] corresponding to zlevel [level]")
 			map_sectors["[level]"] = new data.obj_type(data)
 
 	for(var/obj/effect/map/ship/S in world)
 		S.update_spaceturfs()
-
 
 	return 1
 
@@ -50,7 +52,8 @@ var/global/list/map_sectors = list()
 	var/mapx			//coordinates on the
 	var/mapy			//overmap zlevel
 	var/known = 1
-	var/shipname = "Generic Sector"
+	var/shipname
+
 
 /obj/effect/mapinfo/New()
 	tag = "sector[z]"
@@ -60,12 +63,23 @@ var/global/list/map_sectors = list()
 	name = "generic sector"
 	obj_type = /obj/effect/map/sector
 
+/obj/effect/mapinfo/sector/New()
+	tag = "sector[z]"
+	zlevel = z
+
 /obj/effect/mapinfo/ship
 	name = "generic ship"
 	obj_type = /obj/effect/map/ship
 	var/ship_turfs
 	var/ship_levels
-	shipname = "Generic Space Vessel"
+	shipname = "generic_ship"
+
+/obj/effect/mapinfo/ship/New()
+	tag = "sector[z]"
+	zlevel = z
+
+/obj/effect/mapinfo/New()
+	shipname = "ship_[shipname]"
 
 //===================================================================================
 //Overmap object representing zlevel
@@ -96,17 +110,17 @@ var/global/list/map_sectors = list()
 		shuttle_landing = locate(data.landing_area)
 
 /obj/effect/map/CanPass(atom/movable/A)
-	testing("[A] attempts to enter sector\"[name]\"")
+//	testing("[A] attempts to enter sector\"[name]\"")
 	return 1
 
 /obj/effect/map/Crossed(atom/movable/A)
-	testing("[A] has entered sector\"[name]\"")
+//	testing("[A] has entered sector\"[name]\"")
 	if (istype(A,/obj/effect/map/ship))
 		var/obj/effect/map/ship/S = A
 		S.current_sector = src
 
 /obj/effect/map/Uncrossed(atom/movable/A)
-	testing("[A] has left sector\"[name]\"")
+//	testing("[A] has left sector\"[name]\"")
 	if (istype(A,/obj/effect/map/ship))
 		var/obj/effect/map/ship/S = A
 		S.current_sector = null
@@ -127,19 +141,19 @@ var/global/list/map_sectors = list()
 	loc = locate(nx, ny, OVERMAP_ZLEVEL)
 	map_z = nz
 	map_sectors["[map_z]"] = src
-	testing("Temporary sector at [x],[y] was created, corresponding zlevel is [map_z].")
+//	testing("Temporary sector at [x],[y] was created, corresponding zlevel is [map_z].")
 
 /obj/effect/map/sector/temporary/Del()
 	map_sectors["[map_z]"] = null
-	testing("Temporary sector at [x],[y] was deleted.")
+//	testing("Temporary sector at [x],[y] was deleted.")
 	if (can_die())
-		testing("Associated zlevel disappeared.")
+//		testing("Associated zlevel disappeared.")
 		world.maxz--
 
 /obj/effect/map/sector/temporary/proc/can_die(var/mob/observer)
-	testing("Checking if sector at [map_z] can die.")
+//	testing("Checking if sector at [map_z] can die.")
 	for(var/mob/M in player_list)
 		if(M != observer && M.z == map_z)
-			testing("There are people on it.")
+//			testing("There are people on it.")
 			return 0
 	return 1

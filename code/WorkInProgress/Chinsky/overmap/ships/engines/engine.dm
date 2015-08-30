@@ -9,8 +9,11 @@ var/list/ship_engines = list()
 /datum/ship_engine/New(var/obj/machinery/holder)
 	engine = holder
 	zlevel = holder.z
-	var/obj/effect/map/ship/linked = map_sectors["[holder.z]"]
-	if ( linked )
+	spawn(5)
+		var/obj/effect/map/ship/linked = map_sectors["[zlevel]"]
+		if(!linked)
+			return
+		linked.ship_engines.Add(src)
 		for(var/obj/machinery/computer/engines/E in machines)
 			if ((E.z in linked.ship_levels) && !(src in E.engines))
 				E.engines += src
@@ -55,8 +58,9 @@ var/list/ship_engines = list()
 	return 1
 
 /datum/ship_engine/proc/die()
+	var/obj/effect/map/ship/linked = map_sectors["[zlevel]"]
 	for(var/obj/machinery/computer/engines/E in machines)
-		if (E.z == zlevel)
+		if (E.z in linked.ship_levels)
 			E.engines -= src
 			break
-	qdel(src)
+	del(src)

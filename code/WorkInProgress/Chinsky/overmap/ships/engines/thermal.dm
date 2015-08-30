@@ -47,19 +47,54 @@
 	desc = "Simple thermal nozzle, uses heated gast to propell the ship."
 	icon = 'icons/obj/ship_engine.dmi'
 	icon_state = "nozzle"
+	density = 1
 	var/on = 1
 	var/thrust_limit = 1	//Value between 1 and 0 to limit the resulting thrust
 	var/nominal_thrust = 3000
 	var/effective_pressure = 3000
 	var/datum/ship_engine/thermal/controller
+	var/opened = 0
+
+/obj/machinery/atmospherics/unary/engine/New()
+	..()
+	component_parts = list()
+	component_parts += new /obj/item/stack/cable_coil(src, 2)
+	component_parts += new /obj/item/weapon/circuitboard/engine(src)
+	component_parts += new /obj/item/weapon/stock_parts/matter_bin(src)
+	component_parts += new /obj/item/weapon/stock_parts/matter_bin(src)
+	component_parts += new /obj/item/weapon/stock_parts/matter_bin(src)
+	component_parts += new /obj/item/weapon/stock_parts/matter_bin(src)
+	component_parts += new /obj/item/weapon/stock_parts/manipulator(src)
+	component_parts += new /obj/item/weapon/stock_parts/manipulator(src)
+	component_parts += new /obj/item/weapon/stock_parts/micro_laser(src)
+	component_parts += new /obj/item/weapon/stock_parts/micro_laser(src)
 
 /obj/machinery/atmospherics/unary/engine/initialize()
 	..()
 	controller = new(src)
 
-/obj/machinery/atmospherics/unary/engine/Destroy()
+/obj/machinery/atmospherics/unary/engine/Del()
 	..()
 	controller.die()
+
+/obj/machinery/atmospherics/unary/engine/attackby(obj/item/W as obj, mob/user as mob)
+/*	if(!on)
+		user << "<span class='warning'>It would be very stupid to do it, because the engine is running</span>"
+		return
+	else*/
+	if(default_deconstruction_screwdriver(user, "nozzle", "nozzle", W))
+		return
+
+	if(exchange_parts(user, W))
+		return
+
+	if(default_change_direction_wrench(user, W))
+		return
+
+	if(panel_open)
+		if(istype(W, /obj/item/weapon/crowbar))
+			default_deconstruction_crowbar(W)
+			return 1
 
 /obj/machinery/atmospherics/unary/engine/proc/burn()
 	if (!on)

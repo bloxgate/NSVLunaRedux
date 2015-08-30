@@ -1,6 +1,7 @@
 /obj/machinery/computer/helm
 	name = "helm control console"
 	icon_state = "steering"
+	circuit = "/obj/item/weapon/circuitboard/helm"
 	var/state = "status"
 	var/obj/effect/map/ship/linked			//connected overmap object
 	var/autopilot = 0
@@ -11,10 +12,11 @@
 
 /obj/machinery/computer/helm/initialize()
 	linked = map_sectors["[z]"]
+	world << "[linked]"
 	if (linked)
 		if(!linked.nav_control)
 			linked.nav_control = src
-		testing("Helm console at level [z] found a corresponding overmap object '[linked.name]'.")
+//		testing("Helm console at level [z] found a corresponding overmap object '[linked.name]'.")
 	else
 		testing("Helm console at level [z] was unable to find a corresponding overmap object.")
 
@@ -56,7 +58,7 @@
 		return null
 	if (!get_dist(user, src) > 1 || user.blinded || !linked )
 		return null
-	user.reset_view(linked)
+	user.reset_view(linked, 0)
 	return 1
 
 /obj/machinery/computer/helm/attack_hand(var/mob/user as mob)
@@ -88,7 +90,7 @@
 	data["accel"] = round(linked.get_acceleration())
 	data["heading"] = linked.get_heading() ? dir2angle(linked.get_heading()) : 0
 	data["autopilot"] = autopilot
-	data["manual_control"] = manual_control
+	//data["manual_control"] = manual_control
 
 	var/list/locations[0]
 	for (var/datum/data/record/R in known_sectors)
@@ -110,14 +112,14 @@
 
 /obj/machinery/computer/helm/Topic(href, href_list)
 	if(..())
-		return 1
+		return
 
 	if (!linked)
 		return
 
 	if (href_list["add"])
 		var/datum/data/record/R = new()
-		var/sec_name = input("Input naviation entry name", "New navigation entry", "Sector #[known_sectors.len]") as text
+		var/sec_name = input("Input navigation entry name", "New navigation entry", "Sector #[known_sectors.len]") as text
 		if(!sec_name)
 			sec_name = "Sector #[known_sectors.len]"
 		R.fields["name"] = sec_name
@@ -164,11 +166,11 @@
 	if (href_list["apilot"])
 		autopilot = !autopilot
 
-	if (href_list["manual"])
-		manual_control = !manual_control
+	//if (href_list["manual"])
+		//manual_control = !manual_control
 
 	if (href_list["state"])
 		state = href_list["state"]
 	add_fingerprint(usr)
-	updateUsrDialog()
+	nanomanager.update_uis(src)
 

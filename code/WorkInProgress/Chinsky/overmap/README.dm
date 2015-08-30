@@ -102,3 +102,11 @@ non-zlevel overmap objects
 				EMP
 		nebulaes
 */
+
+
+
+/*NOT TO FORGET:
+
+Luna's thrust will be 2200, if all engines are powered. Need to calculate proper vessel_mass, and set it.
+~guap6512
+*/
