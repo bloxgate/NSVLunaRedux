@@ -90,7 +90,7 @@
 	data["accel"] = round(linked.get_acceleration())
 	data["heading"] = linked.get_heading() ? dir2angle(linked.get_heading()) : 0
 	data["autopilot"] = autopilot
-	//data["manual_control"] = manual_control
+	data["manual_control"] = manual_control
 
 	var/list/locations[0]
 	for (var/datum/data/record/R in known_sectors)
@@ -166,8 +166,8 @@
 	if (href_list["apilot"])
 		autopilot = !autopilot
 
-	//if (href_list["manual"])
-		//manual_control = !manual_control
+	if (href_list["manual"])
+		manual_control = !manual_control
 
 	if (href_list["state"])
 		state = href_list["state"]
